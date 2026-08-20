@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dezorin — محرك قرار البداية</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="brand">Dezorin</span>
+  <span class="sub">Web MVP — بيتا مغلقة</span>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ شاشة الدخول — إضافة جديدة عن v0.1، لا وجود لمفهوم "مستخدم" في النسخة المحلية ============ -->
+  <div class="card" id="loginCard">
+    <h2>تسجيل الدخول</h2>
+    <p class="lead" style="margin-bottom:12px;">الوصول محصور بدعوة — إن لم تملك حسابًا تواصل مع فريق Dezorin.</p>
+    <div class="field">
+      <label>البريد الإلكتروني</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label>كلمة المرور</label>
+      <input type="password" id="loginPassword">
+    </div>
+    <button class="run-btn" id="loginBtn" onclick="handleLogin()">دخول</button>
+    <div class="error" id="loginError"></div>
+  </div>
+
+  <!-- ============ التطبيق الكامل — مخفي حتى تسجيل الدخول ============ -->
+  <div id="appRoot" style="display:none;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h1>محرك قرار البداية</h1>
+      <button class="run-btn" style="width:auto; padding:8px 16px; background:var(--muted);" onclick="handleLogout()">تسجيل الخروج</button>
+    </div>
+    <p class="lead">أدخل بيانات المشروع وإجابات العميل، وسيُطبَّق دليل اتخاذ قرار البداية المعتمد تلقائيًا على المحاور الأربعة.</p>
+
+    <div class="card">
+      <h2>إدارة المشاريع</h2>
+      <p class="lead" style="margin-bottom:12px;">مشاريعك محفوظة في حسابك — تصل إليها من أي جهاز بتسجيل الدخول.</p>
+      <div class="row">
+        <button class="run-btn" style="width:auto; padding:10px 20px;" onclick="saveProject()">حفظ المشروع</button>
+        <button class="run-btn" style="width:auto; padding:10px 20px; background:var(--muted);" onclick="showProjectList()">فتح مشروع</button>
+      </div>
+      <div class="error" id="saveProjectError"></div>
+      <div id="projectListPanel" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h2 style="margin:0;">المشاريع المحفوظة</h2>
+          <button class="run-btn" style="width:auto; padding:6px 14px; background:var(--muted);" onclick="closeProjectList()">إغلاق</button>
+        </div>
+        <div id="projectListResults"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>بيانات المشروع</h2>
+      <div class="row">
+        <div class="field">
+          <label>اسم المشروع</label>
+          <input type="text" id="projName" placeholder="مثال: Perfect Mind Cafe">
+        </div>
+        <div class="field">
+          <label>مجال النشاط</label>
+          <input type="text" id="projField" placeholder="مثال: مقهى">
+        </div>
+      </div>
+      <div class="field">
+        <label>المنتج أو الخدمة الرئيسية</label>
+        <input type="text" id="projProduct" placeholder="مثال: مشروبات قهوة">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>إجابات العميل — الأسئلة الأساسية</h2>
+      <div class="field">
+        <label>1. حدثنا عن مشروعك، كأنك تعرّفه لصديق لأول مرة</label>
+        <textarea id="q1"></textarea>
+      </div>
+      <div class="field">
+        <label>2. ما القصة أو السبب وراء اختيار هذا الاسم تحديدًا؟</label>
+        <textarea id="q2"></textarea>
+      </div>
+      <div class="field">
+        <label>3. ما الذي يجعل هذا المنتج أو الخدمة مختلفًا عمّا يقدّمه الآخرون؟</label>
+        <textarea id="q3"></textarea>
+      </div>
+      <div class="field">
+        <label>4. لماذا بدأت هذا المشروع أصلًا؟</label>
+        <textarea id="q4"></textarea>
+      </div>
+    </div>
+
+    <button class="run-btn" id="runBtn" onclick="runEngine()">تحليل وتحديد نقطة البداية</button>
+
+    <div class="status" id="status"><span class="dot"></span> جارٍ تطبيق الشروط الاثني عشر...</div>
+    <div class="error" id="errorBox"></div>
+
+    <div id="results">
+      <div class="card">
+        <h2>جدول النتائج</h2>
+        <table class="score-table" id="scoreTable"></table>
+      </div>
+      <div class="verdict" id="verdict"></div>
+    </div>
+
+    <div class="card" id="methodCard" style="display:none;">
+      <h2>منهج الاكتشاف الثنائي</h2>
+      <p class="lead" style="margin-bottom:16px;">كل مرحلة تُنفَّذ بشكل مستقل وتتوقف عند نتيجتها. لا تنتقل الأداة تلقائيًا للمرحلة التالية.</p>
+
+      <div id="stage1Block">
+        <button class="run-btn" id="stage1Btn" onclick="runStage1()">قراءة وتحليل نقطة البداية</button>
+        <div class="status" id="stage1Status"><span class="dot"></span> جارٍ قراءة المادة المرتبطة بنقطة البداية...</div>
+        <div class="error" id="stage1Error"></div>
+        <div id="stage1Results" style="display:none; margin-top:18px;"></div>
+      </div>
+
+      <div id="stage2Block" style="display:none; margin-top:24px; padding-top:20px; border-top:1px solid var(--line);">
+        <button class="run-btn" id="stage2Btn" onclick="runStage2()">تنفيذ التفكيك</button>
+        <div class="status" id="stage2Status"><span class="dot"></span> جارٍ التفكيك إلى الوحدات الصريحة...</div>
+        <div class="error" id="stage2Error"></div>
+        <div id="stage2Results" style="display:none; margin-top:18px;"></div>
+      </div>
+
+      <div id="explorationBlock" style="display:none; margin-top:24px; padding-top:20px; border-top:1px solid var(--line);">
+        <button class="run-btn" id="explorationBtn" onclick="runExploration()">بدء الاستكشاف</button>
+        <div class="status" id="explorationStatus"><span class="dot"></span> جارٍ الاستكشاف...</div>
+        <div class="error" id="explorationError"></div>
+        <div id="explorationResults" style="display:none; margin-top:18px;"></div>
+      </div>
+
+      <div id="discoveryBlock" style="display:none; margin-top:24px; padding-top:20px; border-top:1px solid var(--line);">
+        <button class="run-btn" id="discoveryBtn" onclick="runDiscoveryAndBridge()">بدء الاكتشاف</button>
+        <div class="status" id="discoveryStatus"><span class="dot"></span> جارٍ معالجة الاكتشاف وفكرة تنفيذ الشعار...</div>
+        <div class="error" id="discoveryError"></div>
+      </div>
+
+      <div id="directionsBlock" style="display:none; margin-top:24px; padding-top:20px; border-top:1px solid var(--line);">
+        <div id="directionsResults" style="margin-top:14px;"></div>
+      </div>
+
+      <div id="reportBlock" style="display:none; margin-top:24px; padding-top:20px; border-top:1px solid var(--line);">
+        <button class="run-btn" id="reportBtn" onclick="renderClientReport()">إنشاء تقرير العميل</button>
+        <div id="reportResults" style="display:none; margin-top:18px;"></div>
+        <button class="run-btn" id="printReportBtn" style="display:none; margin-top:14px; background:var(--muted);" onclick="window.print()">تصدير تقرير العميل PDF</button>
+      </div>
+    </div>
+
+    <p class="footnote">Dezorin Web MVP — بيتا مغلقة. جميع الاستدعاءات تمر عبر خادم Dezorin؛ لا مفتاح API ولا منطق داخلي يظهر في هذا المتصفح.</p>
+  </div>
+</div>
+
+<!-- مكتبة Supabase (مصادقة + قاعدة بيانات من جهة العميل) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // عنوان خادم Dezorin فقط — ليس سرًّا. القيمة الافتراضية '/api' تعمل بلا أي
+  // تعديل إن كانت الواجهة تُصدَّر من نفس أصل الخادم أو خلف نفس البروكسي.
+  // غيّرها فقط إن كان الخادم على عنوان مختلف تمامًا (مثل http://localhost:3001/api
+  // أثناء التطوير المحلي عندما تُشغَّل الواجهة عبر خادم ملفات منفصل).
+  //
+  // إعدادات Supabase (URL ومفتاح anon) لم تعد تُكتب هنا إطلاقًا — يجلبها js/auth.js
+  // تلقائيًا من الخادم عند التشغيل (GET /api/config)، والخادم يقرأهما من backend/.env.
+  // اضبطهما هناك فقط: SUPABASE_URL وSUPABASE_ANON_KEY.
+  window.DEZORIN_API_BASE = 'http://localhost:3001/api';
+</script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/render.js"></script>
+<script src="js/stages.js"></script>
+<script src="js/projects-ui.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
