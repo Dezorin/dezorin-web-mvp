@@ -18,7 +18,7 @@
   <!-- ============ شاشة الدخول — إضافة جديدة عن v0.1، لا وجود لمفهوم "مستخدم" في النسخة المحلية ============ -->
   <div class="card" id="loginCard">
     <h2>تسجيل الدخول</h2>
-    <p class="lead" style="margin-bottom:12px;">الوصول محصور بدعوة — إن لم تملك حسابًا تواصل مع فريق Dezorin.</p>
+   <p class="lead" style="margin-bottom:12px;">سجّل الدخول إلى حسابك أو أنشئ حسابًا جديدًا للبدء.</p>
     <div class="field">
       <label>البريد الإلكتروني</label>
       <input type="email" id="loginEmail" placeholder="you@example.com">
@@ -28,6 +28,7 @@
       <input type="password" id="loginPassword">
     </div>
     <button class="run-btn" id="loginBtn" onclick="handleLogin()">دخول</button>
+    <button class="run-btn" id="signupBtn" style="margin-top:10px; background:var(--muted);" onclick="handleSignup()">إنشاء حساب جديد</button>
     <div class="error" id="loginError"></div>
   </div>
 
