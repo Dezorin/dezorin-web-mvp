@@ -79,6 +79,21 @@ async function runStage1() {
     return;
   }
 
+    if (!window.__currentProjectId) {
+    errorBox.textContent = 'احفظ المشروع أولًا قبل المتابعة.';
+    errorBox.classList.add('active');
+    return;
+  }
+
+  try {
+    await Api.unlockProject(window.__currentProjectId);
+  } catch (err) {
+    errorBox.textContent =
+      err.message || 'تعذّر فتح المشروع. تحقق من رصيد المشاريع.';
+    errorBox.classList.add('active');
+    return;
+  }
+  
   const winnerKey = window.__lastResult.starting_point;
   const winnerLabel = window.__lastResult.candidates[winnerKey].label;
   const q1 = document.getElementById('q1').value.trim();
