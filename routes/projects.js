@@ -89,4 +89,38 @@ router.put('/projects/:id', async (req, res) => {
   return res.json({ project: data });
 });
 
+// POST /api/projects/:id/unlock — استهلاك رصيد واحد وفتح المشروع المدفوع
+router.post('/projects/:id/unlock', async (req, res) => {
+  try {
+    const { data, error } = await req.supabase.rpc(
+      'unlock_project_with_credit',
+      { p_project_id: req.params.id }
+    );
+
+    if (error) {
+      console.error('unlock_project_with_credit error:', error);
+      return res.status(500).json({ error: 'تعذّر فتح المشروع.' });
+    }
+
+    if (data === 'no_credits') {
+      return res.status(402).json({
+        status: 'no_credits',
+        error: 'لا يوجد رصيد مشاريع كافٍ.'
+      });
+    }
+
+    if (data === 'project_not_found') {
+      return res.status(404).json({
+        status: 'project_not_found',
+        error: 'المشروع غير موجود.'
+      });
+    }
+
+    return res.json({ status: data });
+  } catch (err) {
+    console.error('unlock project error:', err);
+    return res.status(500).json({ error: 'تعذّر فتح المشروع.' });
+  }
+});
+
 module.exports = router;
