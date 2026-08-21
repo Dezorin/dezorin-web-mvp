@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>شراء المشروع — Dezorin</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #111;
+    }
+
+    .card {
+      max-width: 620px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      padding: 32px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 27px;
+    }
+
+    .intro {
+      margin: 0 0 28px;
+      color: #555;
+      line-height: 1.8;
+    }
+
+    h2 {
+      margin: 28px 0 14px;
+      font-size: 19px;
+    }
+
+    .plans {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .plan {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 18px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .plan:hover {
+      border-color: #111;
+    }
+
+    .plan.selected {
+      border: 2px solid #111;
+    }
+
+    .plan-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .price {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    label {
+      display: block;
+      margin: 24px 0 7px;
+      font-weight: bold;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .hint {
+      margin-top: 7px;
+      color: #666;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .bank {
+      margin-top: 26px;
+      padding: 20px;
+      background: #fafafa;
+      border: 1px solid #e1e1e1;
+      border-radius: 10px;
+    }
+
+    .bank-row {
+      margin-bottom: 12px;
+      line-height: 1.7;
+    }
+
+    .bank-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .bank-label {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .bank-value {
+      font-weight: bold;
+      word-break: break-word;
+    }
+
+    .steps {
+      line-height: 2;
+      padding-right: 22px;
+    }
+
+    .whatsapp-btn {
+      display: block;
+      width: 100%;
+      margin-top: 24px;
+      padding: 14px;
+      border: 0;
+      border-radius: 9px;
+      background: #111;
+      color: #fff;
+      font-size: 16px;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .error {
+      margin-top: 10px;
+      color: #b42318;
+      display: none;
+    }
+
+    .back {
+      display: block;
+      margin-top: 22px;
+      text-align: center;
+      color: #555;
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px 14px;
+      }
+
+      .card {
+        padding: 24px 18px;
+      }
+
+      .plans {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="card">
+
+    <h1>شراء المشروع</h1>
+
+    <p class="intro">
+      اختر الباقة المناسبة لك لإكمال مشاريعك والوصول إلى بقية مراحل Dezorin.
+    </p>
+
+    <h2>اختر الباقة</h2>
+
+    <div class="plans">
+
+      <div class="plan selected"
+           data-projects="1"
+           data-price="49"
+           onclick="selectPlan(this)">
+        <div class="plan-title">مشروع واحد</div>
+        <div class="price">49 ر.س</div>
+      </div>
+
+      <div class="plan"
+           data-projects="5"
+           data-price="199"
+           onclick="selectPlan(this)">
+        <div class="plan-title">5 مشاريع</div>
+        <div class="price">199 ر.س</div>
+      </div>
+
+    </div>
+
+    <label for="customerEmail">
+      البريد الإلكتروني المستخدم في حساب Dezorin
+    </label>
+
+    <input
+      id="customerEmail"
+      type="email"
+      placeholder="name@example.com"
+      autocomplete="email"
+    >
+
+    <div class="hint">
+      أدخل نفس البريد الإلكتروني الذي سجلت به في Dezorin حتى تتم إضافة المشاريع إلى حسابك الصحيح.
+    </div>
+
+    <h2>بيانات التحويل البنكي</h2>
+
+    <div class="bank">
+
+      <div class="bank-row">
+        <div class="bank-label">البنك</div>
+        <div class="bank-value">مصرف الراجحي</div>
+      </div>
+
+      <div class="bank-row">
+        <div class="bank-label">اسم المستفيد</div>
+        <div class="bank-value">عبدالرحيم حمدي الحربي</div>
+      </div>
+
+      <div class="bank-row">
+        <div class="bank-label">رقم الآيبان</div>
+        <div class="bank-value">SA3580000336608016354263</div>
+      </div>
+
+    </div>
+
+    <h2>بعد التحويل</h2>
+
+    <ol class="steps">
+      <li>حوّل قيمة الباقة المختارة إلى الحساب الموضح أعلاه.</li>
+     
+      <li>اضغط «إرسال إثبات التحويل».</li>
+      <li>أرفق صورة أو إيصال التحويل في محادثة واتساب.</li>
+      <li>بعد التحقق من التحويل ستتم إضافة المشاريع إلى حسابك.</li>
+    </ol>
+
+    <div id="emailError" class="error">
+      أدخل البريد الإلكتروني المستخدم في حساب Dezorin أولًا.
+    </div>
+
+    <a
+      id="whatsappBtn"
+      class="whatsapp-btn"
+      href="#"
+      onclick="sendToWhatsApp(event)"
+    >
+      إرسال إثبات التحويل
+    </a>
+
+    <a class="back" href="./">
+      العودة إلى Dezorin
+    </a>
+
+  </main>
+
+  <script>
+    let selectedProjects = 1;
+    let selectedPrice = 49;
+
+    function selectPlan(element) {
+      document.querySelectorAll('.plan').forEach(plan => {
+        plan.classList.remove('selected');
+      });
+
+      element.classList.add('selected');
+
+      selectedProjects = Number(element.dataset.projects);
+      selectedPrice = Number(element.dataset.price);
+    }
+
+    function sendToWhatsApp(event) {
+      event.preventDefault();
+
+      const emailInput = document.getElementById('customerEmail');
+      const emailError = document.getElementById('emailError');
+      const email = emailInput.value.trim();
+
+      if (!email || !email.includes('@')) {
+        emailError.style.display = 'block';
+        emailInput.focus();
+        return;
+      }
+
+      emailError.style.display = 'none';
+
+      const phone = '966539358148';
+
+      const message =
+        `السلام عليكم، أرغب في شراء باقة Dezorin.%0A%0A` +
+        `الباقة: ${selectedProjects === 1 ? 'مشروع واحد' : '5 مشاريع'}%0A` +
+        `القيمة: ${selectedPrice} ر.س%0A` +
+        `البريد المستخدم في Dezorin: ${encodeURIComponent(email)}%0A%0A` +
+        `سأرفق إثبات التحويل في هذه المحادثة.`;
+
+      window.open(
+        `https://wa.me/${phone}?text=${message}`,
+        '_blank'
+      );
+    }
+  </script>
+
+</body>
+</html>
