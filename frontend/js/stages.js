@@ -79,11 +79,15 @@ async function runStage1() {
     return;
   }
 
-    if (!window.__currentProjectId) {
-    errorBox.textContent = 'احفظ المشروع أولًا قبل المتابعة.';
+ if (!window.__currentProjectId) {
+  const saved = await saveProject();
+
+  if (!saved || !window.__currentProjectId) {
+    errorBox.textContent = 'تعذّر حفظ المشروع قبل المتابعة.';
     errorBox.classList.add('active');
     return;
   }
+}
 
   try {
     await Api.unlockProject(window.__currentProjectId);
