@@ -35,6 +35,16 @@ async function signInWithPassword(email, password) {
   return data;
 }
 
+async function signUpWithPassword(email, password) {
+  const { data, error } = await supabaseAuthClient.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 async function signOut() {
   await supabaseAuthClient.auth.signOut();
 }
