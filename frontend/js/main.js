@@ -27,6 +27,42 @@ async function handleLogin() {
     btn.disabled = false;
   }
 }
+async function handleSignup() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errorBox = document.getElementById('loginError');
+  const btn = document.getElementById('signupBtn');
+
+  errorBox.classList.remove('active');
+  errorBox.textContent = '';
+
+  if (!email || !password) {
+    errorBox.textContent = 'أدخل البريد الإلكتروني وكلمة المرور.';
+    errorBox.classList.add('active');
+    return;
+  }
+
+  btn.disabled = true;
+
+  try {
+    const data = await signUpWithPassword(email, password);
+
+    if (data.session) {
+      // إذا كان تأكيد البريد غير مطلوب، سيدخل المستخدم تلقائيًا.
+      return;
+    }
+
+    errorBox.textContent = 'تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتأكيد الحساب، ثم سجّل الدخول.';
+    errorBox.style.color = 'var(--ok, #1a7f37)';
+    errorBox.classList.add('active');
+  } catch (err) {
+    errorBox.style.color = '';
+    errorBox.textContent = 'تعذّر إنشاء الحساب: ' + err.message;
+    errorBox.classList.add('active');
+  } finally {
+    btn.disabled = false;
+  }
+}
 
 async function handleLogout() {
   await signOut();
