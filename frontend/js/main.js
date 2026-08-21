@@ -42,6 +42,13 @@ async function handleSignup() {
     return;
   }
 
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if (!emailPattern.test(email)) {
+  errorBox.textContent = 'أدخل بريدًا إلكترونيًا صحيحًا.';
+  errorBox.classList.add('active');
+  return;
+}
   btn.disabled = true;
 
   try {
