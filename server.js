@@ -12,6 +12,7 @@ const exploreRoute = require('./routes/explore');
 const discoverRoute = require('./routes/discover');
 const approveRoute = require('./routes/approve');
 const projectsRoute = require('./routes/projects');
+const adminRoute = require('./routes/admin');
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use('/api', exploreRoute);
 app.use('/api', discoverRoute);
 app.use('/api', approveRoute);
 app.use('/api', projectsRoute);
+app.use('/api', adminRoute);
 
 // معالج أخطاء عام أخير — يمنع تسريب تفاصيل داخلية (مسارات ملفات، stack traces) للعميل
 app.use((err, req, res, next) => {
