@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة رصيد Dezorin</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 40px 20px;
+      color: #111;
+    }
+
+    .admin-card {
+      max-width: 520px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 28px;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 22px;
+      padding: 13px;
+      border: 0;
+      border-radius: 8px;
+      background: #111;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #result {
+      margin-top: 18px;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="admin-card">
+    <h1>إدارة رصيد المشاريع</h1>
+
+    <label for="customerEmail">بريد العميل</label>
+    <input
+      id="customerEmail"
+      type="email"
+      placeholder="client@example.com"
+      autocomplete="off"
+    >
+
+    <label for="creditAmount">عدد المشاريع</label>
+    <input
+      id="creditAmount"
+      type="number"
+      min="1"
+      step="1"
+      value="1"
+    >
+
+    <button id="addCreditsBtn" type="button">
+      إضافة الرصيد
+    </button>
+
+    <div id="result"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    window.DEZORIN_API_BASE = 'https://dezorin-api.onrender.com/api';
+  </script>
+
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+
+  <script>
+    const button = document.getElementById('addCreditsBtn');
+    const result = document.getElementById('result');
+
+    initAuth().catch((err) => {
+      console.error(err);
+      result.textContent = 'تعذّر تهيئة تسجيل الدخول.';
+    });
+
+    button.addEventListener('click', async () => {
+      const email = document.getElementById('customerEmail').value.trim();
+      const credits = Number(document.getElementById('creditAmount').value);
+
+      result.textContent = '';
+
+      if (!email || !Number.isInteger(credits) || credits <= 0) {
+        result.textContent = 'أدخل بريد العميل وعدد مشاريع صحيح.';
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = 'جارٍ إضافة الرصيد...';
+
+      try {
+        const data = await Api.addCredits(email, credits);
+
+        result.textContent =
+          `تمت إضافة ${data.added} مشروع. الرصيد الحالي: ${data.credits}`;
+      } catch (err) {
+        result.textContent = err.message || 'تعذّرت إضافة الرصيد.';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'إضافة الرصيد';
+      }
+    });
+  </script>
+
+</body>
+</html>
