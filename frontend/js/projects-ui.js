@@ -221,3 +221,33 @@ function restoreUIFromState() {
 
   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 }
+function newProject() {
+  // تفريغ حقول المشروع
+  document.getElementById('projName').value = '';
+  document.getElementById('projField').value = '';
+  document.getElementById('projProduct').value = '';
+  document.getElementById('q1').value = '';
+  document.getElementById('q2').value = '';
+  document.getElementById('q3').value = '';
+  document.getElementById('q4').value = '';
+
+  // تصفير حالة المشروع الحالي
+  window.__lastResult = null;
+  window.__lastProject = null;
+  window.__stage1Result = null;
+  window.__stage2Result = null;
+  window.__explorationResult = null;
+  window.__discoveryResults = null;
+  window.__qualifiedDirections = null;
+  window.__pendingDiscoveries = null;
+  window.__approvedDirections = null;
+  window.__currentStage = null;
+  window.__currentProjectId = null;
+
+  // إغلاق قائمة المشاريع وإعادة الواجهة لحالة نظيفة
+  closeProjectList();
+  restoreUIFromState();
+
+  // العودة إلى أعلى الصفحة لبدء المشروع الجديد
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
