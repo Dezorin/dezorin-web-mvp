@@ -39,4 +39,6 @@ const Api = {
   getProject: (id) => apiRequest(`/projects/${id}`, 'GET'),
   createProject: (payload) => apiRequest('/projects', 'POST', payload),
   updateProject: (id, payload) => apiRequest(`/projects/${id}`, 'PUT', payload),
+  unlockProject: (id) => apiRequest(`/projects/${id}/unlock`, 'POST'),
 };
+
