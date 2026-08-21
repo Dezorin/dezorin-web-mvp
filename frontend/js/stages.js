@@ -89,14 +89,26 @@ async function runStage1() {
   }
 }
 
-  try {
-    await Api.unlockProject(window.__currentProjectId);
-  } catch (err) {
+try {
+  await Api.unlockProject(window.__currentProjectId);
+} catch (err) {
+  if (err.message === 'لا يوجد رصيد مشاريع كافٍ.') {
+    errorBox.innerHTML = `
+      <strong>انتهت المرحلة المجانية من المشروع.</strong><br>
+      للمتابعة إلى بقية مراحل Dezorin، يلزم شراء المشروع.<br><br>
+      <a href="purchase.html"
+         style="display:inline-block; padding:10px 18px; background:#111; color:#fff; text-decoration:none; border-radius:8px;">
+        شراء المشروع
+      </a>
+    `;
+  } else {
     errorBox.textContent =
-      err.message || 'تعذّر فتح المشروع. تحقق من رصيد المشاريع.';
-    errorBox.classList.add('active');
-    return;
+      err.message || 'تعذّر فتح المشروع. حاول مرة أخرى.';
   }
+
+  errorBox.classList.add('active');
+  return;
+}
   
   const winnerKey = window.__lastResult.starting_point;
   const winnerLabel = window.__lastResult.candidates[winnerKey].label;
