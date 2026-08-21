@@ -21,7 +21,7 @@ async function handleLogin() {
     await signInWithPassword(email, password);
     // onAuthStateChange (مُسجَّل أدناه) سيتولى إظهار التطبيق تلقائيًا
   } catch (err) {
-    errorBox.textContent = 'فشل تسجيل الدخول: ' + err.message;
+   errorBox.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
     errorBox.classList.add('active');
   } finally {
     btn.disabled = false;
