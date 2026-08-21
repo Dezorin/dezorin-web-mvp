@@ -37,7 +37,7 @@ async function saveProject() {
   if (!window.__lastProject) {
     errorBox.textContent = 'لا يوجد مشروع نشط لحفظه بعد — نفّذ تحليل نقطة البداية أولًا.';
     errorBox.classList.add('active');
-    return;
+   return false;
   }
 
   const payload = {
@@ -59,10 +59,13 @@ async function saveProject() {
     errorBox.classList.add('active');
     setTimeout(() => { errorBox.classList.remove('active'); errorBox.style.color = ''; }, 3000);
 
+    return true;
+    
   } catch (err) {
     console.error(err);
     errorBox.textContent = 'تعذّر حفظ المشروع: ' + err.message;
     errorBox.classList.add('active');
+    return false;
   }
 }
 
