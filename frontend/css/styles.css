@@ -282,3 +282,13 @@
     }
     @page{ margin:18mm 15mm; }
   }
+
+.project-actions{
+  grid-template-columns:repeat(3, 1fr);
+}
+
+@media (max-width:600px){
+  .project-actions{
+    grid-template-columns:1fr;
+  }
+}
