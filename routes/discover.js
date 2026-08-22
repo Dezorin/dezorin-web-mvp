@@ -3,6 +3,7 @@ const router = express.Router();
 
 const { callOpenAI } = require('../lib/openaiClient');
 const { quotaMiddleware, recordUsage } = require('../lib/quota');
+const { requirePaidProject } = require('../lib/requirePaidProject');
 const { DISCOVERY_GEN_SYSTEM_PROMPT, DISCOVERY_JUDGE_SYSTEM_PROMPT } = require('../prompts/discovery');
 const { EXECUTION_IDEA_GEN_SYSTEM_PROMPT, EXECUTION_IDEA_JUDGE_SYSTEM_PROMPT } = require('../prompts/executionIdea');
 
@@ -10,7 +11,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const MAX_EXECUTION_ATTEMPTS = 3;
 
 // POST /api/discover
-// المدخل: { qualifiedRelations: [{id, elements_used, what_emerged}], transferredMaterial: string[] }
+// المدخل: { projectId, qualifiedRelations: [{id, elements_used, what_emerged}], transferredMaterial: string[] }
 // المخرج: { qualifiedDirections: [...], pendingDiscoveries: [...] }
 //
 // ملاحظة معمارية (يُبلَّغ عنها في تقرير الاختلافات):
@@ -20,16 +21,19 @@ const MAX_EXECUTION_ATTEMPTS = 3;
 // للحفاظ على مطابقة سلوك v0.1 حرفيًا (لا توسيع ولا تغيير في تجربة الاستخدام)، هذا الـ
 // endpoint الواحد يكرر منطق الدالتين معًا كما في v0.1، وملف executionIdea.js بقي
 // كملف Prompts فقط (مُستخدَم هنا)، لا كـ endpoint HTTP مستقل.
-router.post('/discover', quotaMiddleware, async (req, res) => {
-  const { qualifiedRelations, transferredMaterial } = req.body || {};
+router.post('/discover', quotaMiddleware, requirePaidProject, async (req, res) => {
+  const { projectId, qualifiedRelations, transferredMaterial } = req.body || {};
 
   if (!Array.isArray(qualifiedRelations) || qualifiedRelations.length === 0) {
-    return res.status(400).json({ error: 'لا توجد علاقات مؤهلة من الاستكشاف للانتقال منها للاكتشاف.' });
+    return res.status(400).json({
+      error: 'لا توجد علاقات مؤهلة من الاستكشاف للانتقال منها للاكتشاف.'
+    });
   }
 
-  const originalMaterial = Array.isArray(transferredMaterial) && transferredMaterial.length > 0
-    ? transferredMaterial.map((m, i) => `${i + 1}. ${m}`).join('\n')
-    : 'غير متوفرة';
+  const originalMaterial =
+    Array.isArray(transferredMaterial) && transferredMaterial.length > 0
+      ? transferredMaterial.map((m, i) => `${i + 1}. ${m}`).join('\n')
+      : 'غير متوفرة';
 
   try {
     // ==== مولّد الاكتشاف — استدعاء واحد يستقبل كل العلاقات المؤهلة معًا ====
@@ -54,7 +58,9 @@ ${originalMaterial}
       : [];
 
     const relationsById = {};
-    qualifiedRelations.forEach(r => relationsById[r.id] = r);
+    qualifiedRelations.forEach(r => {
+      relationsById[r.id] = r;
+    });
 
     const passedDiscoveries = [];
 
@@ -124,9 +130,10 @@ ${originalMaterial}
         attempt <= MAX_EXECUTION_ATTEMPTS && !resolved;
         attempt++
       ) {
-        const rejectedBlock = rejectedAttempts.length > 0
-          ? `\nمحاولات سابقة رُفضت لهذا الاكتشاف — اشتق فكرة مختلفة فعليًا عنها:\n${rejectedAttempts.map((r, i) => `${i + 1}. ${r}`).join('\n')}\n`
-          : '';
+        const rejectedBlock =
+          rejectedAttempts.length > 0
+            ? `\nمحاولات سابقة رُفضت لهذا الاكتشاف — اشتق فكرة مختلفة فعليًا عنها:\n${rejectedAttempts.map((r, i) => `${i + 1}. ${r}`).join('\n')}\n`
+            : '';
 
         const ideaGenPrompt = `discovery_text: ${disc.discovery_text}
 
