@@ -40,9 +40,18 @@ ${qualifiedRelations.map(r => `${r.id}. العناصر: ${JSON.stringify(r.eleme
 ${originalMaterial}
 
 راجع كل العلاقات المؤهلة مجتمعة وأنتج الاكتشاف/الاكتشافات وفق التعليمات، وأعد النتيجة بصيغة JSON المحددة فقط.`;
-    const discGenData = await callOpenAI(OPENAI_API_KEY, DISCOVERY_GEN_SYSTEM_PROMPT, discGenPrompt);
+
+    const discGenData = await callOpenAI(
+      OPENAI_API_KEY,
+      DISCOVERY_GEN_SYSTEM_PROMPT,
+      discGenPrompt
+    );
+
     await recordUsage(req.supabase, req.userId, 'discovery');
-    const rawDiscoveries = Array.isArray(discGenData.discoveries) ? discGenData.discoveries : [];
+
+    const rawDiscoveries = Array.isArray(discGenData.discoveries)
+      ? discGenData.discoveries
+      : [];
 
     const relationsById = {};
     qualifiedRelations.forEach(r => relationsById[r.id] = r);
@@ -53,7 +62,10 @@ ${originalMaterial}
     for (const disc of rawDiscoveries) {
       if (!disc.discovery_text) continue;
 
-      const sourceIds = Array.isArray(disc.source_relation_ids) ? disc.source_relation_ids : [];
+      const sourceIds = Array.isArray(disc.source_relation_ids)
+        ? disc.source_relation_ids
+        : [];
+
       const sourceRelationsText = sourceIds
         .map(id => relationsById[id])
         .filter(Boolean)
@@ -71,13 +83,21 @@ ${sourceRelationsText}
 ${originalMaterial}
 
 راجع وفق الأسئلة الأربعة، وأعد النتيجة بصيغة JSON المحددة فقط.`;
-      const discJudge = await callOpenAI(OPENAI_API_KEY, DISCOVERY_JUDGE_SYSTEM_PROMPT, discJudgePrompt);
+
+      const discJudge = await callOpenAI(
+        OPENAI_API_KEY,
+        DISCOVERY_JUDGE_SYSTEM_PROMPT,
+        discJudgePrompt
+      );
+
       await recordUsage(req.supabase, req.userId, 'discovery');
 
-      const discPass = discJudge.traceable_to_material === true
-        && discJudge.derived_not_restated === true
-        && discJudge.project_specific === true
-        && discJudge.principle_not_product === true;
+      const discPass =
+        discJudge.traceable_to_material === true &&
+        discJudge.derived_not_restated === true &&
+        discJudge.project_specific === true &&
+        discJudge.principle_not_product === true;
+
       if (!discPass) continue;
 
       passedDiscoveries.push({
@@ -85,6 +105,12 @@ ${originalMaterial}
         source_relation_ids: sourceIds
       });
     }
+
+    // ==== تشخيص مؤقت — أعداد فقط، بدون تسجيل مادة المشروع ====
+    console.log('[DISCOVERY COUNTS]', {
+      raw: rawDiscoveries.length,
+      passed: passedDiscoveries.length
+    });
 
     const qualifiedDirections = [];
     const pendingDiscoveries = [];
@@ -99,7 +125,11 @@ ${originalMaterial}
       const rejectedAttempts = [];
       let resolved = false;
 
-      for (let attempt = 1; attempt <= MAX_EXECUTION_ATTEMPTS && !resolved; attempt++) {
+      for (
+        let attempt = 1;
+        attempt <= MAX_EXECUTION_ATTEMPTS && !resolved;
+        attempt++
+      ) {
         const rejectedBlock = rejectedAttempts.length > 0
           ? `\nمحاولات سابقة رُفضت لهذا الاكتشاف — اشتق فكرة مختلفة فعليًا عنها:\n${rejectedAttempts.map((r, i) => `${i + 1}. ${r}`).join('\n')}\n`
           : '';
@@ -113,8 +143,18 @@ ${sourceRelationsText}
 ${originalMaterial}
 ${rejectedBlock}
 اشتق فكرة تنفيذ شعار وفق التعليمات، وأعد النتيجة بصيغة JSON المحددة فقط.`;
-        const ideaGenData = await callOpenAI(OPENAI_API_KEY, EXECUTION_IDEA_GEN_SYSTEM_PROMPT, ideaGenPrompt);
-        await recordUsage(req.supabase, req.userId, 'execution-idea');
+
+        const ideaGenData = await callOpenAI(
+          OPENAI_API_KEY,
+          EXECUTION_IDEA_GEN_SYSTEM_PROMPT,
+          ideaGenPrompt
+        );
+
+        await recordUsage(
+          req.supabase,
+          req.userId,
+          'execution-idea'
+        );
 
         if (!ideaGenData.execution_idea) {
           continue;
@@ -132,8 +172,18 @@ execution_idea المُقترَحة: ${ideaGenData.execution_idea}
 derivation_trace: ${ideaGenData.derivation_trace}
 
 راجع وفق السؤال المحدد، وأعد النتيجة بصيغة JSON المحددة فقط.`;
-        const ideaJudge = await callOpenAI(OPENAI_API_KEY, EXECUTION_IDEA_JUDGE_SYSTEM_PROMPT, ideaJudgePrompt);
-        await recordUsage(req.supabase, req.userId, 'execution-idea');
+
+        const ideaJudge = await callOpenAI(
+          OPENAI_API_KEY,
+          EXECUTION_IDEA_JUDGE_SYSTEM_PROMPT,
+          ideaJudgePrompt
+        );
+
+        await recordUsage(
+          req.supabase,
+          req.userId,
+          'execution-idea'
+        );
 
         if (ideaJudge.execution_idea_valid === true) {
           qualifiedDirections.push({
@@ -142,6 +192,7 @@ derivation_trace: ${ideaGenData.derivation_trace}
             execution_point: ideaGenData.execution_idea,
             selection_reason: ideaGenData.derivation_trace
           });
+
           resolved = true;
         } else {
           rejectedAttempts.push(ideaGenData.execution_idea);
@@ -156,11 +207,17 @@ derivation_trace: ${ideaGenData.derivation_trace}
       }
     }
 
-    return res.json({ qualifiedDirections, pendingDiscoveries });
+    return res.json({
+      qualifiedDirections,
+      pendingDiscoveries
+    });
 
   } catch (err) {
     console.error('[POST /api/discover]', err);
-    return res.status(502).json({ error: 'حدث خطأ أثناء الاكتشاف/فكرة تنفيذ الشعار: ' + err.message });
+
+    return res.status(502).json({
+      error: 'حدث خطأ أثناء الاكتشاف/فكرة تنفيذ الشعار: ' + err.message
+    });
   }
 });
 
