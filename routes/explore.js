@@ -11,7 +11,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 // POST /api/explore
 // المدخل: { projectId, breakdown: string[] }
 // المخرج: { candidates_generated: number, qualified_relations: [{id, elements_used, what_emerged}] }
-router.post('/explore', quotaMiddleware, requirePaidProject, async (req, res) => {
+router.post('/explore', requirePaidProject, quotaMiddleware, async (req, res) => {
   const { projectId, breakdown } = req.body || {};
 
   if (!Array.isArray(breakdown) || breakdown.length === 0) {
