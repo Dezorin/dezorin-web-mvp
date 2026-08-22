@@ -21,7 +21,7 @@ const MAX_EXECUTION_ATTEMPTS = 3;
 // للحفاظ على مطابقة سلوك v0.1 حرفيًا (لا توسيع ولا تغيير في تجربة الاستخدام)، هذا الـ
 // endpoint الواحد يكرر منطق الدالتين معًا كما في v0.1، وملف executionIdea.js بقي
 // كملف Prompts فقط (مُستخدَم هنا)، لا كـ endpoint HTTP مستقل.
-router.post('/discover', quotaMiddleware, requirePaidProject, async (req, res) => {
+router.post('/discover', requirePaidProject, quotaMiddleware, async (req, res) => {
   const { projectId, qualifiedRelations, transferredMaterial } = req.body || {};
 
   if (!Array.isArray(qualifiedRelations) || qualifiedRelations.length === 0) {
