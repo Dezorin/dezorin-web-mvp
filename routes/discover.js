@@ -106,12 +106,6 @@ ${originalMaterial}
       });
     }
 
-    // ==== تشخيص مؤقت — أعداد فقط، بدون تسجيل مادة المشروع ====
-    console.log('[DISCOVERY COUNTS]', {
-      raw: rawDiscoveries.length,
-      passed: passedDiscoveries.length
-    });
-
     const qualifiedDirections = [];
     const pendingDiscoveries = [];
 
