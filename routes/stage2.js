@@ -11,7 +11,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 // POST /api/stage2
 // المدخل: { projectId, transferredMaterial: string[] }
 // المخرج: { breakdown: [...], units_meta: [...], links: [...] }
-router.post('/stage2', quotaMiddleware, requirePaidProject, async (req, res) => {
+router.post('/stage2', requirePaidProject, quotaMiddleware, async (req, res) => {
   const { projectId, transferredMaterial } = req.body || {};
 
   if (!Array.isArray(transferredMaterial) || transferredMaterial.length === 0) {
