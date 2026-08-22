@@ -11,7 +11,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 // POST /api/stage1
 // المدخل: { projectId, winnerLabel, q1, q2, q3, q4 }
 // المخرج: { transferred_material: [...] }
-router.post('/stage1', quotaMiddleware, requirePaidProject, async (req, res) => {
+router.post('/stage1', requirePaidProject, quotaMiddleware, async (req, res) => {
   const { projectId, winnerLabel, q1, q2, q3, q4 } = req.body || {};
 
   if (!winnerLabel || !q1 || !q2 || !q3 || !q4) {
