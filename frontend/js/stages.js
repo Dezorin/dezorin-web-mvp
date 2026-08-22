@@ -79,37 +79,37 @@ async function runStage1() {
     return;
   }
 
- if (!window.__currentProjectId) {
-  const saved = await saveProject();
+  if (!window.__currentProjectId) {
+    const saved = await saveProject();
 
-  if (!saved || !window.__currentProjectId) {
-    errorBox.textContent = 'تعذّر حفظ المشروع قبل المتابعة.';
+    if (!saved || !window.__currentProjectId) {
+      errorBox.textContent = 'تعذّر حفظ المشروع قبل المتابعة.';
+      errorBox.classList.add('active');
+      return;
+    }
+  }
+
+  try {
+    await Api.unlockProject(window.__currentProjectId);
+  } catch (err) {
+    if (err.message === 'لا يوجد رصيد مشاريع كافٍ.') {
+      errorBox.innerHTML = `
+        <strong>انتهت المرحلة المجانية من المشروع.</strong><br>
+        للمتابعة إلى بقية مراحل Dezorin، يلزم شراء المشروع.<br><br>
+        <a href="purchase.html"
+           style="display:inline-block; padding:10px 18px; background:#111; color:#fff; text-decoration:none; border-radius:8px;">
+          شراء المشروع
+        </a>
+      `;
+    } else {
+      errorBox.textContent =
+        err.message || 'تعذّر فتح المشروع. حاول مرة أخرى.';
+    }
+
     errorBox.classList.add('active');
     return;
   }
-}
 
-try {
-  await Api.unlockProject(window.__currentProjectId);
-} catch (err) {
-  if (err.message === 'لا يوجد رصيد مشاريع كافٍ.') {
-    errorBox.innerHTML = `
-      <strong>انتهت المرحلة المجانية من المشروع.</strong><br>
-      للمتابعة إلى بقية مراحل Dezorin، يلزم شراء المشروع.<br><br>
-      <a href="purchase.html"
-         style="display:inline-block; padding:10px 18px; background:#111; color:#fff; text-decoration:none; border-radius:8px;">
-        شراء المشروع
-      </a>
-    `;
-  } else {
-    errorBox.textContent =
-      err.message || 'تعذّر فتح المشروع. حاول مرة أخرى.';
-  }
-
-  errorBox.classList.add('active');
-  return;
-}
-  
   const winnerKey = window.__lastResult.starting_point;
   const winnerLabel = window.__lastResult.candidates[winnerKey].label;
   const q1 = document.getElementById('q1').value.trim();
@@ -127,7 +127,15 @@ try {
   document.getElementById('reportBlock').style.display = 'none';
 
   try {
-    const data = await Api.stage1({ winnerLabel, q1, q2, q3, q4 });
+    const data = await Api.stage1({
+      projectId: window.__currentProjectId,
+      winnerLabel,
+      q1,
+      q2,
+      q3,
+      q4
+    });
+
     window.__stage1Result = data;
     window.__currentStage = 'stage1';
 
@@ -135,6 +143,7 @@ try {
       <ul style="margin:0; padding-right:20px; font-size:14px; color:var(--text);">
         ${data.transferred_material.map(x => `<li style="margin-bottom:6px;">${x}</li>`).join('')}
       </ul>`;
+
     resultsBox.innerHTML = html;
     resultsBox.style.display = 'block';
 
@@ -175,7 +184,10 @@ async function runStage2() {
   document.getElementById('reportBlock').style.display = 'none';
 
   try {
-    const data = await Api.stage2({ transferredMaterial: window.__stage1Result.transferred_material });
+    const data = await Api.stage2({
+      projectId: window.__currentProjectId,
+      transferredMaterial: window.__stage1Result.transferred_material
+    });
 
     data.units_meta = Array.isArray(data.units_meta) ? data.units_meta : [];
     data.links = Array.isArray(data.links) ? data.links : [];
@@ -187,6 +199,7 @@ async function runStage2() {
       <ul style="margin:0; padding-right:20px; font-size:14px; color:var(--text);">
         ${data.breakdown.map(x => `<li style="margin-bottom:6px;">${x}</li>`).join('')}
       </ul>`;
+
     resultsBox.innerHTML = html;
     resultsBox.style.display = 'block';
 
@@ -231,7 +244,11 @@ async function runExploration() {
   window.__approvedDirections = null;
 
   try {
-    const result = await Api.explore({ breakdown: window.__stage2Result.breakdown });
+    const result = await Api.explore({
+      projectId: window.__currentProjectId,
+      breakdown: window.__stage2Result.breakdown
+    });
+
     window.__explorationResult = result;
     window.__currentStage = 'exploration';
 
@@ -273,7 +290,11 @@ async function runDiscoveryAndBridge() {
   errorBox.classList.remove('active');
   errorBox.textContent = '';
 
-  if (!window.__explorationResult || !window.__explorationResult.qualified_relations || window.__explorationResult.qualified_relations.length === 0) {
+  if (
+    !window.__explorationResult ||
+    !window.__explorationResult.qualified_relations ||
+    window.__explorationResult.qualified_relations.length === 0
+  ) {
     errorBox.textContent = 'لا توجد علاقات مؤهلة من الاستكشاف للانتقال منها للاكتشاف.';
     errorBox.classList.add('active');
     return;
@@ -286,13 +307,17 @@ async function runDiscoveryAndBridge() {
 
   try {
     const { qualifiedDirections, pendingDiscoveries } = await Api.discover({
+      projectId: window.__currentProjectId,
       qualifiedRelations: window.__explorationResult.qualified_relations,
-      transferredMaterial: window.__stage1Result ? window.__stage1Result.transferred_material : []
+      transferredMaterial: window.__stage1Result
+        ? window.__stage1Result.transferred_material
+        : []
     });
 
     window.__qualifiedDirections = qualifiedDirections;
     window.__pendingDiscoveries = pendingDiscoveries;
     window.__currentStage = 'discovery';
+
     renderDirectionCards(qualifiedDirections, pendingDiscoveries);
 
   } catch (err) {
@@ -309,10 +334,13 @@ async function runDiscoveryAndBridge() {
 // أصبحت هنا async لأنها تستدعي /api/approve — لذا سُمّيت handleApproveAllDirections
 // لتمييزها بوضوح كمعالج حدث غير متزامن. هذا الاسم الوحيد الذي تغيّر عن v0.1 في هذا الملف.
 async function handleApproveAllDirections() {
-  const starting = window.__lastResult ? window.__lastResult.candidates[window.__lastResult.starting_point].label : null;
+  const starting = window.__lastResult
+    ? window.__lastResult.candidates[window.__lastResult.starting_point].label
+    : null;
 
   try {
     const { approvedDirections } = await Api.approve({
+      projectId: window.__currentProjectId,
       qualifiedDirections: window.__qualifiedDirections,
       startingPointLabel: starting,
       projectName: window.__lastProject || null
@@ -325,7 +353,10 @@ async function handleApproveAllDirections() {
     document.getElementById('approvedAllBadge').classList.add('show');
 
     document.getElementById('reportBlock').style.display = 'block';
-    document.getElementById('reportBlock').scrollIntoView({ behavior: 'smooth', block: 'end' });
+    document.getElementById('reportBlock').scrollIntoView({
+      behavior: 'smooth',
+      block: 'end'
+    });
 
   } catch (err) {
     console.error(err);
