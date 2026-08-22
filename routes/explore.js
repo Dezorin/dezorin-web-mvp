@@ -27,6 +27,7 @@ ${breakdown.map((x, i) => `${i + 1}. ${x}`).join('\n')}
     const genData = await callOpenAI(OPENAI_API_KEY, EXPLORATION_SYSTEM_PROMPT, userPrompt);
     await recordUsage(req.supabase, req.userId, 'exploration');
     const candidates = Array.isArray(genData.candidate_relations) ? genData.candidate_relations : [];
+    console.log('[EXPLORE DEBUG] candidates:', JSON.stringify(candidates, null, 2));
 
     let qualifiedRelations = [];
 
